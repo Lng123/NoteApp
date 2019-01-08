@@ -38,7 +38,7 @@ public class Camera {
                 // Error occurred while creating the File
             }
             // Continue only if the File was successfully created
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
+            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(activity,"com.noteapp.noteapp.fileprovider",photoFile));
             System.out.println("Photo saved into: >>>>>>>>>>>>>>>>>>>>>> " + Uri.fromFile(photoFile).toString());
             this.activity.startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
 
