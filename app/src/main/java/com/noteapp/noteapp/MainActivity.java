@@ -21,18 +21,10 @@ import android.view.MenuItem;
 import android.widget.Button;
 
 import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static android.os.Environment.getExternalStoragePublicDirectory;
-import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    static final int REQUEST_TAKE_PHOTO = 1;
-    String mCurrentPhotoPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +49,17 @@ public class MainActivity extends AppCompatActivity
                 camera.dispatchTakePictureIntent();
             }
         });
+
+        // Find NoteApp image files
+        String noteAppPicturePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/NoteApp";
+
+        if (noteAppPicturePath != null && !noteAppPicturePath.equals("")) {
+            File directory = new File(noteAppPicturePath);
+            File[] files = directory.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                Log.d("Files", "FileName:" + files[i].getName());
+            }
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
