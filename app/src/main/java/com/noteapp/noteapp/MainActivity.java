@@ -1,17 +1,12 @@
 package com.noteapp.noteapp;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.FileProvider;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,20 +16,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
+import com.noteapp.noteapp.utils.ImageFile;
+import com.noteapp.noteapp.utils.MyListAdapter;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.List;
+import java.io.FileInputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    final int THUMBNAIL_SIZE = 64;
+
     private final static String TAG = "MainActivity";
+    private ArrayList<ImageFile> data = new ArrayList<ImageFile>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,15 +45,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         final Button button = findViewById(R.id.CameraButton);
         final Camera camera = new Camera(this, getPackageManager(), getOutputMediaFile());
         button.setOnClickListener(new View.OnClickListener() {
@@ -61,9 +52,6 @@ public class MainActivity extends AppCompatActivity
                 camera.dispatchTakePictureIntent();
             }
         });
-
-        //ListView listView = findViewById(R.id.listview);
-        //listView.setAdapter(new MyListAdapter(this, R.layout.list_item, data));
 
         // Find NoteApp image files
         String noteAppPicturePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString()+"/NoteApp";
@@ -73,7 +61,17 @@ public class MainActivity extends AppCompatActivity
         if (files != null) {
             for (int i = 0; i < files.length; i++) {
                 Log.d("Files", "FileName:" + files[i].getName());
-            }
+                Bitmap currentThumbnail = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(files[i].getPath()), THUMBNAIL_SIZE, THUMBNAIL_SIZE);
+                ImageFile imageFile = new ImageFile(currentThumbnail, files[i].getName());
+                data.add(imageFile);
+                }
+        }
+
+        if (!data.isEmpty()) {
+            ListView listView = findViewById(R.id.listview);
+            listView.setAdapter(new MyListAdapter(this, R.layout.list_item, data));
+        } else {
+            System.out.println("Data was empty <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -162,42 +160,5 @@ public class MainActivity extends AppCompatActivity
         }
 
         return mediaStorageDir;
-    }
-
-    private class MyListAdapter extends ArrayAdapter<String> {
-
-        private int layout;
-
-        public MyListAdapter(@NonNull Context context, int resource, @NonNull List<String> objects) {
-            super(context, resource, objects);
-            this.layout = resource;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder mainViewHolder = null;
-            if (convertView == null) {
-                LayoutInflater inflater = LayoutInflater.from(getContext());
-                convertView = inflater.inflate(layout, parent, false);
-                ViewHolder viewHolder = new ViewHolder();
-                viewHolder.thumbnail = (ImageView) convertView.findViewById(R.id.list_item_thumbnail);
-                viewHolder.title = (TextView) convertView.findViewById(R.id.list_item_text);
-                // viewHolder.button.setOnClickerListener(new View.OnClickListener() {
-                // @Override
-                // public void onClick(View v) {
-                // ...
-                // }
-                convertView.setTag(viewHolder);
-            } else {
-                mainViewHolder = (ViewHolder) convertView.getTag();
-                mainViewHolder.title.setText(getItem(position));
-            }
-            return convertView;
-        }
-    }
-
-    public class ViewHolder {
-        ImageView thumbnail;
-        TextView title;
     }
 }
